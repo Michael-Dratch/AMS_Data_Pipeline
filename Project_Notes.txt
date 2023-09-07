@@ -1,0 +1,22 @@
+1. What are the top ten cargo types by year
+2. What are the top ten cargo types by month
+3. What are the top ten cargo types by week
+4. What are the top 5 countries that these cargo types come from
+5. What are the top ports that these cargo types come into
+
+
+Python ETL components
+
+Input 
+    - Takes in csv file and outputs a df
+Data Cleaner
+    - removes nulls, outliers, ecetera
+Transormer
+    - dfs into proper tabeles to be loaded
+Loader
+    - Takes cleaned df and loads it into sql server
+
+Table 
+    Cargo Types
+    Shipments
+    
