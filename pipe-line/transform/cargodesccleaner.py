@@ -1,6 +1,4 @@
-import pandas as pd
-import re
-from cleaner.cleaner import Cleaner
+from transform.cleaner import Cleaner
 
 
 class CargoDescriptionCleaner(Cleaner):

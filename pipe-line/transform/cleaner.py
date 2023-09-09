@@ -1,7 +1,3 @@
-import pandas as pd
-import re
-
-
 class Cleaner:
 
     def remove_rows_with_null_values(self, df, column_name):

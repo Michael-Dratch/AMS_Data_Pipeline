@@ -1,4 +1,3 @@
-import pandas as pd
 from input import Input
 from cleaner.cargodesccleaner import CargoDescriptionCleaner
 
