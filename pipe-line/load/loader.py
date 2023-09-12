@@ -12,5 +12,5 @@ class Loader:
     def close_resources(self):
         self.conn.close()
 
-    def load_database(self):
+    def load_database(self, tables):
         pass

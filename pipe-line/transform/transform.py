@@ -1,15 +1,27 @@
 class Transformer:
 
-    def make_tables(self, headers_df, cargo_descriptions_df, tariffs_df):
+    def transform_tables(self, headers_df, cargo_descriptions_df, tariffs_df):
         headers_df = self.add_foreign_keys(headers_df)
-        self.make_domestic_ports_table(headers_df)
-        self.make_foreign_ports_table(headers_df)
-        self.make_vessels_table(headers_df)
-        self.make_voyages_table(headers_df)
-        self.make_shipments_table(headers_df)
-        self.cargo_types(cargo_descriptions_df)
-        self.cargo_items_table(cargo_descriptions_df)
-        self.make_tariffs_table(tariffs_df)
+        cargo_descriptions_df = self.add_cargo_type_keys(cargo_descriptions_df)
+        domestic_ports = self.make_domestic_ports_table(headers_df)
+        foreign_ports = self.make_foreign_ports_table(headers_df)
+        vessels = self.make_vessels_table(headers_df)
+        voyages = self.make_voyages_table(headers_df)
+        shipments = self.make_shipments_table(headers_df)
+        cargo_types = self.cargo_types(cargo_descriptions_df)
+        cargo_items = self.cargo_items_table(cargo_descriptions_df)
+        tariffs = self.make_tariffs_table(tariffs_df)
+
+        tables = {'domestic_ports': domestic_ports,
+                  'foreign_ports': foreign_ports,
+                  'vessels': vessels,
+                  'voyages': voyages,
+                  'shipments': shipments,
+                  'cargo_types': cargo_types,
+                  'cargo_items': cargo_items,
+                  'tariffs': tariffs}
+
+        return tables
 
     def add_foreign_keys(self, headers_df):
         headers_df = self.add_port_of_unlading_keys(headers_df)
@@ -51,7 +63,7 @@ class Transformer:
         ports = ports[ports['port_of_unlading'].str.contains('[a-z,A-Z]')]
         ports = self.split_domestic_port_name_into_seperate_fields(ports)
         ports = ports[['port_of_unlading_id', 'city', 'state']]
-        ports.rename({'port_of_unlading_id': 'port_id'})
+        ports.rename(columns={'port_of_unlading_id': 'port_id'})
         return ports
 
     def make_foreign_ports_table(self, headers_df):
@@ -61,7 +73,7 @@ class Transformer:
         ports = self.split_foreign_port_name_into_seperate_fields(
             ports, isDomestic=False)
         ports = ports[['foreign_port_of_lading', 'city', 'country']]
-        ports.rename({'foreign_port_of_lading_id': 'port_id'})
+        ports.rename(columns={'foreign_port_of_lading_id': 'port_id'})
         return ports
 
     def split_domestic_port_name_into_seperate_fields(self, ports_df):
@@ -93,14 +105,30 @@ class Transformer:
     def make_shipments_table(self, headers_df):
         shipments = headers_df[['identifier',
                                 'voyage_id', 'weight', 'weight_unit']]
-        shipments = shipments.rename({'identifier': 'shipment_id'})
+        shipments = shipments.rename(columns={'identifier': 'shipment_id'})
         return shipments
 
     def make_tariffs_table(self, tariffs_df):
-        pass
+        tariffs = tariffs_df[['identifier', 'harmonized_number',
+                              'harmonized_value', 'harmonized_weight', 'harmonized_weight_unit']]
+        tariffs['tariff_id'] = tariffs.reset_index().index
+        tariffs.rename(columns={'identifier': 'shipment_id'})
+        return tariffs
+
+    def add_cargo_type_keys(self, cargo_descriptions_df):
+        cargo_items = cargo_descriptions_df.sort_values("description_text")
+        cargo_items['cargo_type_id'] = cargo_items['description_text'].rank(
+            method='dense')
+        return cargo_items
 
     def cargo_items_table(self, cargo_descriptions_df):
-        pass
+        cargo_items = cargo_descriptions_df[[
+            'cargo_type_id', 'identifier', 'piece_count']]
+        cargo_items.rename(columns={'identifier': 'shipment_id'})
+        return cargo_items
 
     def cargo_types(self, cargo_descriptions_df):
-        pass
+        cargo_types = cargo_descriptions_df.groupby(
+            'description_text', 'cargo_type_id').count()
+        cargo_types = cargo_types[['cargo_type_id', 'description_text']]
+        return cargo_types
