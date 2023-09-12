@@ -95,11 +95,14 @@ class Transformer:
                               'vessel_name', 'vessel_country_code']]
         vessels = vessels.groupby(
             ['vessel_id', 'vessel_name', 'vessel_country_code']).count().reset_index()
+        vessels.rename(columns={'vessel_name': 'name',
+                       'vessel_country_code': 'country_code'})
         return vessels
 
     def make_voyages_table(self, headers_df):
         voyages = headers_df[['voyage_id', 'vessel_id', 'port_of_unlading_id',
                              'foreign_port_of_lading_id', 'actual_arrival_date', 'place_of_receipt']]
+        voyages.rename(columns={'actual_arrival_date': 'arrival_date'})
         return voyages
 
     def make_shipments_table(self, headers_df):
