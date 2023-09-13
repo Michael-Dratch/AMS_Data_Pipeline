@@ -5,7 +5,6 @@ from transform.cargodesccleaner import CargoDescriptionCleaner
 from transform.headercleaner import HeaderCleaner
 from transform.tariffcleaner import TariffCleaner
 from transform.transform import Transformer
-from load.databasebuilder import DatabaseBuilder
 from load.loader import Loader
 
 
@@ -28,5 +27,4 @@ tables = Transformer().transform_tables(
     header_df, cargo_df, tariff_df)
 
 # LOAD
-DatabaseBuilder().initialize_database()
 Loader().load_database(tables)
